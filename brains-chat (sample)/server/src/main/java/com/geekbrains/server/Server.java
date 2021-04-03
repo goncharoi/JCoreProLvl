@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private Vector<ClientHandler> clients;
@@ -16,11 +18,19 @@ public class Server {
     public Server() {
         clients = new Vector<>();
         authService = SQLiteDBService.getInstance(); //new SimpleAuthService();
+
+        //ДЗ 4: сервис создан в классе сервера, чтобы обеспечить закрытие потоков
+        // newCachedThreadPool - потому что число потоков заранее неизвестно
+        ExecutorService executorService = Executors.newCachedThreadPool();
+
+
         try (ServerSocket serverSocket = new ServerSocket(8189)) {
             System.out.println("Сервер запущен на порту 8189");
             while (true) {
                 Socket socket = serverSocket.accept();
-                new ClientHandler(this, socket);
+
+                new ClientHandler(this, socket, executorService); // ДЗ 4: передаю executorService туда, где создаются потоки
+
                 System.out.println("Подключился новый клиент");
             }
         } catch (IOException e) {
@@ -28,6 +38,8 @@ public class Server {
         }
         finally {
             SQLiteDBService.freeInstance();
+
+            executorService.shutdown(); //ДЗ 4: закрытие потоков
         }
         System.out.println("Сервер завершил свою работу");
     }
