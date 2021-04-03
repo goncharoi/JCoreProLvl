@@ -57,26 +57,8 @@ public class Network {
             out = new DataOutputStream(socket.getOutputStream());
             Thread clientListenerThread = new Thread(() -> {
                 try {
-                    while (true) {
-                        String msg = in.readUTF();
-                        if (msg.startsWith("/authok ")) {
-                            callOnAuthenticated.callback(msg.split("\\s")[1]);
-                            break;
-                        }
-                    }
-                    while (true) {
-                        String msg = in.readUTF();
-                        if (msg.equals("/end")) {
-                            break;
-                        }
-//>>> Кусок про смену ника
-                        if (msg.startsWith("/authok ")) {
-                            System.out.println("получил сообщение о смене ника " + msg);
-                            callOnAuthenticated.callback(msg.split("\\s")[1]);
-                        }
-//<<< Кусок про смену ника
-                        callOnMsgReceived.callback(msg);
-                    }
+                    getAuthOk();
+                    receiveMsg();
                 } catch (IOException e) {
                     callOnException.callback("Соединение с сервером разорвано");
                 } finally {
@@ -87,6 +69,32 @@ public class Network {
             clientListenerThread.start();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void receiveMsg() throws IOException{
+        while (true) {
+            String msg = in.readUTF();
+            if (msg.equals("/end")) {
+                break;
+            }
+//>>> Кусок про смену ника
+            if (msg.startsWith("/authok ")) {
+                System.out.println("получил сообщение о смене ника " + msg);
+                callOnAuthenticated.callback(msg.split("\\s")[1]);
+            }
+//<<< Кусок про смену ника
+            callOnMsgReceived.callback(msg);
+        }
+    }
+
+    public static void getAuthOk() throws IOException{
+        while (true) {
+            String msg = in.readUTF();
+            if (msg.startsWith("/authok ")) {
+                callOnAuthenticated.callback(msg.split("\\s")[1]);
+                break;
+            }
         }
     }
 
