@@ -1,8 +1,11 @@
 package com.geekbrains.server;
 
 import java.sql.*;
+import java.util.logging.Logger;
 
 public class SQLiteDBService implements DBService {
+
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName()); //ДЗ 6: создаем логгер для данного класса
 
     private static SQLiteDBService instance;
 
@@ -33,7 +36,7 @@ public class SQLiteDBService implements DBService {
 
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:ChatDB.db");
-            System.out.println("Создано соединение с БД");
+            LOGGER.info("Создано соединение с БД"); //ДЗ 6: выводим сообщение в лог
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -51,7 +54,7 @@ public class SQLiteDBService implements DBService {
             preparedStatement.setString(2, password);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) lvReturn = resultSet.getString("nick");
-            System.out.println("Запрос ника вернул:"+lvReturn);
+            LOGGER.info("Запрос ника вернул:"+lvReturn); //ДЗ 6: выводим сообщение в лог
             preparedStatement.close();
             resultSet.close();
         } catch (SQLException e) {
@@ -74,7 +77,7 @@ public class SQLiteDBService implements DBService {
             preparedStatement.setString(2, login);
             preparedStatement.setString(3, password);
             if (preparedStatement.executeUpdate() == 1) lvReturn = true;
-            System.out.println("Ник сменен на "+nick);
+            LOGGER.info("Ник сменен на "+nick); //ДЗ 6: выводим сообщение в лог
             preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();

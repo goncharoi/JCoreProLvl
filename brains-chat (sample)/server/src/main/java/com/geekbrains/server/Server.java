@@ -6,10 +6,14 @@ import java.net.Socket;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class Server {
     private Vector<ClientHandler> clients;
     private DBService authService;
+
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName()); //ДЗ 6: создаем логгер для данного класса
 
     public DBService getAuthService() {
         return authService;
@@ -23,15 +27,14 @@ public class Server {
         // newCachedThreadPool - потому что число потоков заранее неизвестно
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-
         try (ServerSocket serverSocket = new ServerSocket(8189)) {
-            System.out.println("Сервер запущен на порту 8189");
+            LOGGER.info("Сервер запущен на порту 8189"); //ДЗ 6: выводим сообщение в лог
             while (true) {
                 Socket socket = serverSocket.accept();
 
                 new ClientHandler(this, socket, executorService); // ДЗ 4: передаю executorService туда, где создаются потоки
 
-                System.out.println("Подключился новый клиент");
+                LOGGER.info("Подключился новый клиент"); //ДЗ 6: выводим сообщение в лог
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -41,7 +44,7 @@ public class Server {
 
             executorService.shutdown(); //ДЗ 4: закрытие потоков
         }
-        System.out.println("Сервер завершил свою работу");
+        LOGGER.info("Сервер завершил свою работу"); //ДЗ 6: выводим сообщение в лог
     }
 
     public void broadcastMsg(String msg) {
