@@ -5,9 +5,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 public class ClientHandler {
 
+    private static final Logger LOGGER = Logger.getLogger(Server.class.getName()); //ДЗ 6: создаем логгер для данного класса
 
     private String nickname;
     private Server server;
@@ -59,10 +61,10 @@ public class ClientHandler {
                     String[] tokens = msg.split("\\s", 4); //nick login pass
                     if(tokens[1] != null && !server.isNickBusy(tokens[1])){
                         if(server.getAuthService().changeNicknameByLoginAndPassword(tokens[1], tokens[2], tokens[3])) {
-                            System.out.println("отправляю клиенту сообщение о смене ника");
+                            LOGGER.info("отправляю клиенту сообщение о смене ника"); //ДЗ 6: выводим сообщение в лог
                             sendMsg("/authok " + tokens[1]);
                             nickname = tokens[1];
-                            System.out.println("Рассылаю новый список ников");
+                            LOGGER.info("Рассылаю новый список ников"); //ДЗ 6: выводим сообщение в лог
                             server.broadcastClientsList();
                         }
                     }
@@ -79,7 +81,7 @@ public class ClientHandler {
             String msg = in.readUTF();
             // /auth login1 pass1
             if (msg.startsWith("/auth ")) {
-                System.out.println("Попытка авторизации: "+msg);
+                LOGGER.info("Попытка авторизации: "+msg); //ДЗ 6: выводим сообщение в лог
                 String[] tokens = msg.split("\\s");
                 String nick = server.getAuthService().getNicknameByLoginAndPassword(tokens[1], tokens[2]);
                 if (nick != null && !server.isNickBusy(nick)) {
